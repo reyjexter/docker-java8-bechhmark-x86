@@ -23,7 +23,7 @@ public class Benchmark {
         System.out.println("Detected " + coreCount + " available processor core(s). Creating one thread per core.");
 
         // The target duration for the benchmark in seconds.
-        final int DURATION_SECONDS = 15;
+        final int DURATION_SECONDS = 60;
 
         // An ExecutorService to manage our pool of threads.
         ExecutorService executor = Executors.newFixedThreadPool(coreCount);
