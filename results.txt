@@ -1,0 +1,14 @@
+Linux: 
+
+Attaching to java-benchmark-container
+java-benchmark-container  | Starting benchmark...
+java-benchmark-container  | Running computationally intensive task for approximately 60 seconds.
+java-benchmark-container  | This will test CPU performance under emulation (if applicable).
+java-benchmark-container  | 
+java-benchmark-container  | Benchmark finished.
+java-benchmark-container  | -----------------------------------------
+java-benchmark-container  | Total operations completed: 1,246,051
+java-benchmark-container  | Actual execution time: 60.00 seconds
+java-benchmark-container  | Operations per second (Score): 20,767.50
+java-benchmark-container  | -----------------------------------------
+java-benchmark-container exited with code 0

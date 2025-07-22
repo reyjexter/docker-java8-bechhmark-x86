@@ -1,0 +1,5 @@
+services:
+  benchmark-app:
+    build: .
+    container_name: java-benchmark-container
+    platform: linux/amd64
