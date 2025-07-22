@@ -1,45 +1,72 @@
 import java.math.BigInteger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A simple benchmark class that performs a computationally intensive task
- * for a fixed duration to measure performance.
+ * A multi-threaded benchmark class that performs a computationally intensive task
+ * for a fixed duration to measure the total throughput of a system's CPU cores.
  */
 public class Benchmark {
 
-    public static void main(String[] args) {
-        System.out.println("Starting benchmark...");
-        
+    // A volatile boolean flag to signal all running threads to stop.
+    // Volatile ensures that changes to this variable are visible across all threads.
+    private static volatile boolean isRunning = true;
+
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("Starting multi-threaded benchmark...");
+
+        // Determine the number of available CPU cores to the JVM.
+        // This will be the number of threads we spawn.
+        int coreCount = Runtime.getRuntime().availableProcessors();
+        System.out.println("Detected " + coreCount + " available processor core(s). Creating one thread per core.");
+
         // The target duration for the benchmark in seconds.
-        final long DURATION_SECONDS = 60;
-        final long DURATION_NANOS = DURATION_SECONDS * 1_000_000_000L;
+        final int DURATION_SECONDS = 15;
 
-        long operations = 0;
+        // An ExecutorService to manage our pool of threads.
+        ExecutorService executor = Executors.newFixedThreadPool(coreCount);
+        
+        // An AtomicLong to safely count the total number of operations across all threads.
+        // This prevents race conditions when multiple threads try to update the counter simultaneously.
+        AtomicLong totalOperations = new AtomicLong(0);
+
         long startTime = System.nanoTime();
-        long elapsedTime = 0;
 
-        System.out.println("Running computationally intensive task for approximately " + DURATION_SECONDS + " seconds.");
-        System.out.println("This will test CPU performance under emulation (if applicable).");
-
-        // Loop until the desired duration has passed.
-        while (elapsedTime < DURATION_NANOS) {
-            // Perform a reasonably complex calculation.
-            // Calculating the factorial of a moderately large number using BigInteger is a good candidate.
-            // The result is not stored to avoid consuming memory; we are only interested in the CPU work.
-            calculateFactorial(500); 
-            
-            operations++;
-            elapsedTime = System.nanoTime() - startTime;
+        // Create and submit a worker task for each core.
+        for (int i = 0; i < coreCount; i++) {
+            executor.submit(() -> {
+                // Each thread runs this loop until the main thread sets isRunning to false.
+                while (isRunning) {
+                    calculateFactorial(500);
+                    totalOperations.incrementAndGet(); // Atomically increment the total counter.
+                }
+            });
         }
 
-        // Get the final time and calculate the actual duration.
-        long finalTime = System.nanoTime();
-        double actualDurationSeconds = (finalTime - startTime) / 1_000_000_000.0;
+        System.out.println("Benchmark running for approximately " + DURATION_SECONDS + " seconds...");
+
+        // Let the benchmark run for the specified duration.
+        Thread.sleep(DURATION_SECONDS * 1000);
+
+        // Signal all threads to stop their work.
+        isRunning = false;
+
+        // Gracefully shut down the executor. It will wait for currently running tasks to finish.
+        executor.shutdown();
+        // Wait for all threads in the pool to terminate.
+        executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        long endTime = System.nanoTime();
+        double actualDurationSeconds = (endTime - startTime) / 1_000_000_000.0;
 
         System.out.println("\nBenchmark finished.");
         System.out.println("-----------------------------------------");
-        System.out.printf("Total operations completed: %,d\n", operations);
+        System.out.printf("Threads used: %d\n", coreCount);
+        System.out.printf("Total operations completed: %,d\n", totalOperations.get());
         System.out.printf("Actual execution time: %.2f seconds\n", actualDurationSeconds);
-        System.out.printf("Operations per second (Score): %,.2f\n", operations / actualDurationSeconds);
+        System.out.printf("Operations per second (Score): %,.2f\n", totalOperations.get() / actualDurationSeconds);
         System.out.println("-----------------------------------------");
     }
 
@@ -52,12 +79,10 @@ public class Benchmark {
      */
     public static BigInteger calculateFactorial(int n) {
         if (n < 0) {
-            // This check is good practice but won't be hit in the current benchmark loop.
             throw new IllegalArgumentException("Factorial is not defined for negative numbers.");
         }
         BigInteger result = BigInteger.ONE;
         for (int i = 2; i <= n; i++) {
-            // The multiplication of BigInteger objects is the core of the workload.
             result = result.multiply(BigInteger.valueOf(i));
         }
         return result;
