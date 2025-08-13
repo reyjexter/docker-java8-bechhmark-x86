@@ -1,5 +1,34 @@
 services:
-  benchmark-app:
-    build: .
-    container_name: java-benchmark-container
+  gen-java:
+    image: python:3.12-slim
+    container_name: gen-java
+    working_dir: /src
+    volumes:
+      - java_src:/src
+      - ./generate_java_benchmark.py:/scripts/generate_java_benchmark.py
+    command: >
+      sh -c "echo '[GEN] Generating Java benchmark sources...' &&
+             python /scripts/generate_java_benchmark.py --out /src --count 10000 --package com.example.bench &&
+             echo '[GEN] Generation complete.' &&
+             tail -f /dev/null"
+
+  javac-bench:
+    image: openjdk:8-jdk-slim
     platform: linux/amd64
+    container_name: javac-bench
+    working_dir: /src
+    volumes:
+      - java_src:/src
+    depends_on:
+      - gen-java
+    command: >
+      sh -c "echo '[JAVAC] Starting compilation...' &&
+             rm -f \$(find . -name '*.class') &&
+             START=\$(date +%s) &&
+             find . -name '*.java' | xargs -n 1000 javac &&
+             END=\$(date +%s) &&
+             echo \"[JAVAC] Compilation finished in \$((END-START)) seconds.\" &&
+             tail -f /dev/null"
+
+volumes:
+  java_src:

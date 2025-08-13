@@ -1,14 +1,5 @@
-Linux: 
+Mac M1:
 
-java-benchmark-container  | Starting multi-threaded benchmark...
-java-benchmark-container  | Detected 32 available processor core(s). Creating one thread per core.
-java-benchmark-container  | Benchmark running for approximately 60 seconds...
-java-benchmark-container  | 
-java-benchmark-container  | Benchmark finished.
-java-benchmark-container  | -----------------------------------------
-java-benchmark-container  | Threads used: 32
-java-benchmark-container  | Total operations completed: 4,184,341
-java-benchmark-container  | Actual execution time: 60.05 seconds
-java-benchmark-container  | Operations per second (Score): 69,681.04
-java-benchmark-container  | -----------------------------------------
-java-benchmark-container exited with code 0
+javac-bench  | [JAVAC] Compilation finished in 25 seconds.
+
+Linux:
