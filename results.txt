@@ -1,5 +1,11 @@
 Mac M1:
+-------
 
-javac-bench  | [JAVAC] Compilation finished in 25 seconds.
+Test 1: javac-bench  | [JAVAC] Compilation finished in 25 seconds.
+
+Test 2: javac-bench  | [JAVAC] Compilation finished in 83 seconds.
+
+Test 3: javac-bench  | [JAVAC] Compilation finished in 35 seconds.
 
 Linux:
+-------
